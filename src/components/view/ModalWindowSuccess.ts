@@ -7,7 +7,7 @@ export interface ISuccessModalWindow {
 	render(total: number): HTMLElement;
 }
 
-// Класс для отображения окна с успешным оформлением заказа
+// Класс для отображения модального окна с успешным оформлением заказа
 export class SuccessModalWindow implements ISuccessModalWindow {
 	successElement: HTMLElement;
 	descriptionElement: HTMLElement;

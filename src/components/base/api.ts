@@ -5,7 +5,7 @@ export type ApiListResponse<Type> = {
 
 export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 
-// Класс, осуществляющий запросы на сервер
+// Класс, осуществляющий запросы к серверу
 export class Api {
     readonly baseUrl: string;
     protected options: RequestInit;
