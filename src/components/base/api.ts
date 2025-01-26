@@ -5,6 +5,7 @@ export type ApiListResponse<Type> = {
 
 export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 
+// Класс, осуществляющий запросы на сервер
 export class Api {
     readonly baseUrl: string;
     protected options: RequestInit;
@@ -19,17 +20,17 @@ export class Api {
         };
     }
 
-    protected handleResponse(response: Response): Promise<object> {
-        if (response.ok) return response.json();
+    protected handleResponse<T>(response: Response): Promise<T> {
+        if (response.ok) return response.json() as Promise<T>;
         else return response.json()
             .then(data => Promise.reject(data.error ?? response.statusText));
     }
 
-    get(uri: string) {
+    get<T>(uri: string): Promise<T> {
         return fetch(this.baseUrl + uri, {
             ...this.options,
             method: 'GET'
-        }).then(this.handleResponse);
+        }).then(this.handleResponse<T>);
     }
 
     post(uri: string, data: object, method: ApiPostMethods = 'POST') {
