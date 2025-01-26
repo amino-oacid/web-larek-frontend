@@ -1,6 +1,6 @@
 # Проектная работа "Веб-ларек"
 
-<a href="" target="_blank">"Веб-ларек"</a>
+<a href="https://amino-oacid.github.io/web-larek-frontend/" target="_blank">"Веб-ларек"</a>
 
 ## Используемый стек
 HTML, SCSS, TS, Webpack
