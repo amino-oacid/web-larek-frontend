@@ -1,6 +1,6 @@
 import './scss/styles.scss';
 import { EventEmitter } from './components/base/events';
-import { ApiModel } from './components/model/ApiModel';
+import { AppApi } from './components/AppApi';
 import { DataModel } from './components/model/DataModel';
 import { ModalWindow } from './components/view/ModalWindow';
 import { API_URL, CDN_URL } from './utils/constants';
@@ -16,6 +16,7 @@ import { OrderFormModel } from './components/model/OrderFormModel';
 import { Order } from './components/view/Order';
 import { Contacts } from './components/view/Contacts';
 import { SuccessModalWindow } from './components/view/ModalWindowSuccess';
+import { Page } from './components/view/Page';
 
 // Переменные элементов на странице
 const cardCatalogElement = document.querySelector('#card-catalog') as HTMLTemplateElement;
@@ -27,8 +28,9 @@ const contactsFormElement = document.querySelector('#contacts') as HTMLTemplateE
 const successModalWindowElement = document.querySelector('#success') as HTMLTemplateElement;
 
 // Экземпляры классов для работы с данными и событиями
-const apiModel = new ApiModel(CDN_URL, API_URL);
+const appApi = new AppApi(CDN_URL, API_URL);
 const events = new EventEmitter();
+const page = new Page(events);
 const dataModel = new DataModel(events);
 const modalWindow = new ModalWindow(ensureElement<HTMLElement>('#modal-container'), events);
 const basket = new Basket(basketElement, events);
@@ -38,7 +40,7 @@ const orderForm = new Order(orderFormElement, events);
 const contactsForm = new Contacts(contactsFormElement, events);
 
 // Получение всего списка товаров
-apiModel.getProductList()
+appApi.getProductList()
   .then(function(data: ApiListResponse<IProductItem>) {
     dataModel.products = data.items;
   })
@@ -46,9 +48,9 @@ apiModel.getProductList()
 
 // Обработка события получения списка товаров и рендеринг карточек товаров
 events.on('products:receive', () => {
-  dataModel.products.forEach(product => {
+  page.catalog = dataModel.products.map(product => {
     const card = new Card(cardCatalogElement, { onClick: () => events.emit('product:select', product)});
-    ensureElement<HTMLElement>('.gallery').append(card.render(product));
+    return card.render(product);
   });
 });
 
@@ -65,7 +67,7 @@ events.on('modalWindowProduct:open', (product: IProductItem) => {
 // Обработка события добавления товара в корзину
 events.on('product:addToBasket', () => {
   basketModel.addProduct(dataModel.product);
-  basket.updateBasketHeaderCounter(basketModel.getProductsCount());
+  page.counter = basketModel.getProductsCount();
   modalWindow.close();
 });
 
@@ -84,7 +86,7 @@ events.on('basket:open', () => {
 // Обработка события удаления товара из корзины
 events.on('basket:removeBasketProduct', (item: IProductItem) => {
 	basketModel.removeProduct(item);
-	basket.updateBasketHeaderCounter(basketModel.getProductsCount());
+  page.counter = basketModel.getProductsCount();
 	basket.updateBasketPrice(basketModel.getBasketPrice());
 	basket.items = basketModel.products.map((item, index) => {
 		const basketItem = new BasketItem(basketItemElement, { onClick: () => events.emit('basket:removeBasketProduct', item)});
@@ -100,11 +102,11 @@ events.on('order:open', () => {
 });
 
 // Обработка события выбора метода оплаты
-events.on('orderForm:paymentMethod', (button: HTMLButtonElement) => { 
+events.on('order:paymentMethod', (button: HTMLButtonElement) => { 
   orderFormModel.payment = button.name });
 
 // Обработка события изменения значения адреса в форме заказа
-events.on('orderForm:change', (data: {field: string, value: string}) => {
+events.on('order:input', (data: {field: string, value: string}) => {
   orderFormModel.setOrderAddress(data.field, data.value);
 });
 
@@ -116,7 +118,7 @@ events.on('orderFormErrors:address', (errors: Partial<IOrderForm>) => {
 });
 
 // Обработка события открытия формы контактов
-events.on('contacts:open', () => {
+events.on('order:submit', () => {
 	orderFormModel.total = basketModel.getBasketPrice();
 	modalWindow.setContent(contactsForm.render());
 	modalWindow.render();
@@ -135,14 +137,14 @@ events.on('orderFormErrors:contacts', (errors: Partial<IOrderForm>) => {
 })
 
 // Обработка события открытия модального окна с успешным оформлением заказа
-events.on('successModalWindow:open', () => {
-  apiModel.postOrderForm(orderFormModel.getOrderDetails())
+events.on('contacts:submit', () => {
+  appApi.postOrderForm(orderFormModel.getOrderDetails())
     .then((data) => {
       console.log(data); // ответ сервера
       const successModalWindow = new SuccessModalWindow(successModalWindowElement, events);
       modalWindow.setContent(successModalWindow.render(basketModel.getBasketPrice()));
       basketModel.clearBasket();
-      basket.updateBasketHeaderCounter(basketModel.getProductsCount());
+      page.counter = basketModel.getProductsCount();
       modalWindow.render();
     })
     .catch(error => console.log(error));
@@ -153,10 +155,10 @@ events.on('successModalWindow:close', () => modalWindow.close());
 
 // Блокировка прокрутки страницы при открытии модального окна
 events.on('modal:open', () => {
-  modalWindow.isLocked = true;
+  page.isLocked = true;
 });
 
 // Снятие блокировки прокрутки страницы при закрытии модального окна
 events.on('modal:close', () => {
-  modalWindow.isLocked = false;
+  page.isLocked = false;
 });

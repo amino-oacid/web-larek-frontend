@@ -12,13 +12,11 @@ export class ModalWindow implements IModalWindow {
   private modalContainer: HTMLElement;
 	private closeButton: HTMLButtonElement;
 	private modalContent: HTMLElement;
-	private pageWrapper: HTMLElement;
 
 	constructor(modalContainer: HTMLElement, private events: IEvents) {
 		this.modalContainer = modalContainer;
 		this.closeButton = modalContainer.querySelector('.modal__close');
 		this.modalContent = modalContainer.querySelector('.modal__content');
-		this.pageWrapper = document.querySelector('.page__wrapper');
 
 		this.closeButton.addEventListener('click', () => this.close());
 		this.modalContainer.addEventListener('click', () => this.close());
@@ -38,10 +36,6 @@ export class ModalWindow implements IModalWindow {
 
 	setContent(content: HTMLElement): void {
 		this.modalContent.replaceChildren(content);
-	}
-
-	set isLocked(locked: boolean) {
-		this.pageWrapper.classList.toggle('page__wrapper_locked', locked);
 	}
 
 	render(): HTMLElement {

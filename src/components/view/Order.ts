@@ -1,41 +1,24 @@
 import { IEvents } from "../base/events";
+import { Form } from "./Form";
 
 export interface IOrder {
-  orderFormElement: HTMLFormElement;
 	buttons: HTMLButtonElement[];
 	paymentMethod: string;
-	formErrorsElement: HTMLElement;
-	render(): HTMLElement;
 }
 
 // Класс для отображения формы заказа
-export class Order implements IOrder {
-	orderFormElement: HTMLFormElement;
+export class Order extends Form implements IOrder {
 	buttons: HTMLButtonElement[];
-	submitButton: HTMLButtonElement;
-	formErrorsElement: HTMLElement;
 
-	constructor(template: HTMLTemplateElement, protected events: IEvents) {
-		this.orderFormElement = template.content.querySelector('.form').cloneNode(true) as HTMLFormElement;
-		this.buttons = Array.from(this.orderFormElement.querySelectorAll('.button_alt'));
-		this.submitButton = this.orderFormElement.querySelector('.order__button');
-		this.formErrorsElement = this.orderFormElement.querySelector('.form__errors');
-		
+	constructor(template: HTMLTemplateElement, events: IEvents) {
+		super(template, events);
+		this.buttons = Array.from(this.formElement.querySelectorAll('.button_alt'));
+
 		this.buttons.forEach(button => {
 			button.addEventListener('click', () => {
 				this.paymentMethod = button.name;
-				events.emit('orderForm:paymentMethod', button);
+				events.emit('order:paymentMethod', button);
 			});
-		});
-
-		this.orderFormElement.addEventListener('input', (event: Event) => {
-			const target = event.target as HTMLInputElement;
-			this.events.emit('orderForm:change', { field: target.name, value: target.value });
-		});
-
-		this.orderFormElement.addEventListener('submit', (event: Event) => {
-			event.preventDefault();
-			this.events.emit('contacts:open');
 		});
 	}
 
@@ -44,12 +27,5 @@ export class Order implements IOrder {
 			button.classList.toggle('button_alt-active', button.name === method);
 		});
 	}
-	
-	set isValid(value: boolean) {
-		this.submitButton.disabled = !value;
-	}
-	
-	render() {
-		return this.orderFormElement;
-	}
+
 }

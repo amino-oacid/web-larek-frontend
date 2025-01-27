@@ -34,7 +34,10 @@ export class BasketModel implements IBasketModel {
   }
 
   addProduct(product: IProductItem): void {
-    this._products.push(product);
+    const isProductInBasket = this._products.some(p => p.id === product.id);
+		if (!isProductInBasket) {
+			this._products.push(product);
+		}
   }
 
   removeProduct(product: IProductItem): void {

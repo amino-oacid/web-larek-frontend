@@ -1,8 +1,8 @@
-import { Api, ApiListResponse } from '../base/api';
-import { IOrderForm, IOrderResult, IProductItem } from '../../types/index';
+import { Api, ApiListResponse } from './base/api';
+import { IOrderForm, IOrderResult, IProductItem } from '../types/index';
 
 // Класс, наследующийся от Api и получающий данные с сервера
-export class ApiModel extends Api {
+export class AppApi extends Api {
   
   constructor(private cdn: string, baseUrl: string, options?: RequestInit) {
     super(baseUrl, options);

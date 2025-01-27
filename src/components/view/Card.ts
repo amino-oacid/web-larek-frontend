@@ -34,9 +34,7 @@ export class Card implements ICard {
   }
 
   protected setText(element: HTMLElement, value: unknown): void {
-		if (element) {
-			element.textContent = String(value);
-		}
+		element.textContent = String(value);
 	}
   
   protected setPrice(value: number | null): string {

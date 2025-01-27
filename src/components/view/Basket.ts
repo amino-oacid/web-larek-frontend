@@ -7,9 +7,6 @@ export interface IBasket {
   basketList: HTMLElement;
 	button: HTMLButtonElement;
 	basketPrice: HTMLElement;
-	basketHeaderButton: HTMLButtonElement;
-	basketHeaderCounter: HTMLElement;
-	updateBasketHeaderCounter(value: number): void;
 	updateBasketPrice(price: number): void;
 	render(): HTMLElement;
 }
@@ -21,8 +18,6 @@ export class Basket implements IBasket {
   basketList: HTMLElement;
 	button: HTMLButtonElement;
 	basketPrice: HTMLElement;
-	basketHeaderButton: HTMLButtonElement;
-	basketHeaderCounter: HTMLElement;
 
   constructor(template: HTMLTemplateElement, protected events: IEvents) {
     this.basketElement = template.content.querySelector('.basket').cloneNode(true) as HTMLElement;
@@ -30,11 +25,8 @@ export class Basket implements IBasket {
 		this.basketList = this.basketElement.querySelector('.basket__list');
 		this.button = this.basketElement.querySelector('.basket__button');
 		this.basketPrice = this.basketElement.querySelector('.basket__price');
-		this.basketHeaderButton = document.querySelector('.header__basket');
-		this.basketHeaderCounter = document.querySelector('.header__basket-counter');
 		
     this.button.addEventListener('click', () => this.events.emit('order:open'));
-		this.basketHeaderButton.addEventListener('click', () => this.events.emit('basket:open'));
 
 		this.items = [];
   }
@@ -47,10 +39,6 @@ export class Basket implements IBasket {
 			this.button.setAttribute('disabled', 'disabled');
 			this.basketList.replaceChildren(createElement<HTMLParagraphElement>('p', { textContent: 'Корзина пуста' }));
 		}
-	}
-
-  updateBasketHeaderCounter(value: number) {
-		this.basketHeaderCounter.textContent = String(value);
 	}
 
 	updateBasketPrice(price: number) {
